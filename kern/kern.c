@@ -16,8 +16,6 @@ void other_main() {
 	while(1);
 }
 
-char buf[0x10000];
-
 void main(uint32_t mbaddr) {
 	uint32_t mods_count = *(uint32_t*)(mbaddr+20);	
 	uint32_t mods_addr = *(uint32_t*)(mbaddr+24);
@@ -27,12 +25,37 @@ void main(uint32_t mbaddr) {
 	//term_puts("Initializing hardware... \n");
 	extern void init();
 	extern void rd_init(uint32_t);
-	init();
+	extern int fs_read(const char*, char*, int);
+	extern int mkproc(void*,int,int);
+	extern void* kalloc(int);
+	extern void kfree(void*);
+	init();	
 	rd_init(init_addr);
-	fs_read("Z:\\HengstOS\\System32\\Init.bin", buf, 0x10000);
+	//fs_read("Z:\\HengstOS\\System32\\Init.bin", buf, size);
 	//term_puts(buf);
 	asm volatile("int $32");
-	mkproc((uint32_t)buf, 0x10000, 0x8000);
+	exec("Z:\\HengstOS\\System32\\init", 0, (char**)0);
+	//mkproc((uint32_t)buf, size, size);
 	//create_process((uint32_t)other_main, (uint32_t)stack+0x4000, 0x1B, 0x23);
 	while(1);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -97,44 +97,57 @@ int fs_write(const char* path, const char* buff, int len) {
 	return fs_ops[idx]->write(path+2, buff, len);
 }
 
-int fs_read(const char* path, char* buff, int len) {
+void vfs_abs_path(char* path2, const char* path) {
+	int i, j;
+	for(i = 0; i < strlen(cwd); i++) {
+		path2[i] = cwd[i];
+	}
+	path2[i] = '\\';
+	for(j = 0; j < strlen(path); j++) {
+		path2[i+j+1] = path[j];
+	}
+	path2[i+j+1] = 0;
+}
+
+int vfs_get_drv_idx(const char* path) {
 	char drv = path[0];
-	int idx = -1;
 	if(path[1] == ':') {
 		for(int i = 0; i < MAX_DRIVES; i++) {
 			if(drives[i] == drv) {
-				idx = i;
-				break;
+				return i;
 			}
 		}
 	}
+	return -1;
+}
+
+int fs_size(const char* path) {
+	int idx = vfs_get_drv_idx(path);
 	if(idx == -1) {
 		char path2[256];
-		int i, j;
-		for(i = 0; i < strlen(cwd); i++) {
-			path2[i] = cwd[i];
-		}
-		path2[i] = '\\';
-		for(j = 0; j < strlen(path); j++) {
-			path2[i+j+1] = path[j];
-		}
-		path2[i+j+1] = 0;
-		drv = path2[0];
-		if(path2[1] == ':') {
-			for(int i = 0; i < MAX_DRIVES; i++) {
-				if(drives[i] == drv) {
-					idx = i;
-					break;
-				}
-			}
-		}
-		//term_puts(path2);
+		vfs_abs_path(path2, path);
+		idx = vfs_get_drv_idx(path2);
 		if(idx == -1) {
 			return ERR_INVAL;
 		}
-		//term_puts(path2+2);
+		return fs_ops[idx]->size(path2+2);
+	}
+	if(fs_ops[idx] == 0) {
+		return ERR_RDONLY;
+	}
+	return fs_ops[idx]->size(path+2);
+}
+
+int fs_read(const char* path, char* buff, int len) {
+	int idx = vfs_get_drv_idx(path);
+	if(idx == -1) {
+		char path2[256];
+		vfs_abs_path(path2, path);
+		idx = vfs_get_drv_idx(path2);
+		if(idx == -1) {
+			return ERR_INVAL;
+		}
 		return fs_ops[idx]->read(path2+2, buff, len);
-		//return ERR_INVAL;
 	}
 	if(fs_ops[idx] == 0) {
 		return ERR_RDONLY;

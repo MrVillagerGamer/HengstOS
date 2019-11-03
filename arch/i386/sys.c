@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <arch/i386/term.h>
 #include <fs/fs.h>
+#include <stdbool.h>
 
 extern uint32_t get_data_base(uint16_t);
 extern uint8_t ps2_kbd_get();
@@ -39,4 +40,59 @@ void sys_handler(uint32_t eax, uint32_t ds) {
 	if(data[0] == 6) { // clear console screen
 		term_clear();
 	}
+	if(data[0] == 7) { // execute process
+		extern int exec(const char*,int,char**);
+		sys_exec_info_t* info = (sys_exec_info_t*)(data[1]+get_data_base(ds));
+		char** argv = (char**)((uint32_t)(info->argv)+get_data_base(ds));
+		for(int i = 0; i < info->argc; i++) {
+			argv[i] = (char*)((uint32_t)(argv[i])+get_data_base(ds));
+		}
+		int pid = exec(info->path+get_data_base(ds), info->argc, argv);
+		for(int i = 0; i < info->argc; i++) {
+			argv[i] = (char*)((uint32_t)(argv[i])-get_data_base(ds));
+		}
+		info->handle = pid;
+	}
+	if(data[0] == 8) { // get process state
+		sys_state_info_t* info = (sys_state_info_t*)(data[1]+get_data_base(ds));
+		extern bool get_pid_state(int);
+		info->state = (int)get_pid_state(info->handle);
+	}
+	if(data[0] == 9) { // terminate process
+		rmproc(get_current_pid());
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

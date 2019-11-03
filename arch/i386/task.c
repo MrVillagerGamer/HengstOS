@@ -43,6 +43,11 @@ void task_init() {
 	task_states[0] = 1;
 }
 
+bool get_pid_state(int pid) {
+	if(pid < 0 || pid > 256) return 0;
+	return task_states[pid];
+}
+
 int get_current_pid() {
 	return cur_task;
 }
@@ -51,11 +56,13 @@ void del_proc(int idx) {
 	task_states[idx] = 0;
 }
 
-int add_proc(uint32_t eip, uint32_t esp, uint32_t cs, uint32_t ds) {
+int add_proc(uint32_t eip, uint32_t esp, uint32_t cs, uint32_t ds, int argc, char** argv) {
 	int idx = find_free_pid();
 	tasks[idx] = tasks[cur_task];
 	tasks[idx].eip = eip;
 	tasks[idx].esp = esp;
+	tasks[idx].eax = argc;
+	tasks[idx].ebx = (uint32_t)argv;
 	tasks[idx].cs = cs;
 	tasks[idx].ds = ds;
 	tasks[idx].es = ds;

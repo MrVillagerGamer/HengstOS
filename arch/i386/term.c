@@ -56,6 +56,21 @@ void term_putc(char c) {
 			term_y--;
 		}
 		break;
+	case '\t':
+		term_x += 4;
+		if(term_x >= 80) {
+			term_x = 0;
+			term_y++;
+			if(term_y >= 24) {
+				term_scroll();
+				term_y--;
+			}
+		}
+		break;
+	case '\b':
+		term_x--;
+		term_vram[(term_y*80+term_x)*2] = ' ';
+		break;
 	default:
 		term_vram[(term_y*80+term_x)*2] = c;
 		term_vram[(term_y*80+term_x)*2+1] = term_attr;

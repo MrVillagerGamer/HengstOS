@@ -6,6 +6,7 @@
 typedef struct {
 	int(*read)(const char*,char*,int);
 	int(*write)(const char*,const char*,int);
+	int(*size)(const char*);
 } fs_ops_t;
 
 extern int fs_write(const char*,const char*,int);

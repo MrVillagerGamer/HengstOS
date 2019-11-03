@@ -58,7 +58,7 @@ unsigned int rd_get_size(const char *in) {
  
 }
 
-int rd_read(const char* path, char* buf, int len) {
+tar_header* rd_get_hdr_ptr(const char* path) {
 	uint32_t addr = rd_addr;
 	for (int i = 0; ; i++) {
 		tar_header* header = (tar_header*)addr;
@@ -67,18 +67,35 @@ int rd_read(const char* path, char* buf, int len) {
 		unsigned int size = rd_get_size(header->size);
 		char filename[256];
 		decode_rd(filename, header->filename);
-		if(strncmp(path, filename, strlen(path))) {
-			int j;
-			for(j = 0; j < size && j < len; j++) {
-				buf[j] = ((char*)addr)[j+512];
-			}
-			return j;
+		if(strncmp(path, filename, strlen(filename)+1)) {
+			return header;
 		}
 		addr += ((size / 512) + 1) * 512;
 		if(size % 512)
 			addr += 512;
 	}
-	return ERR_INVAL;
+	return (tar_header*)0;
+}
+
+int rd_size(const char* path) {
+	tar_header* ptr = rd_get_hdr_ptr(path);
+	if(ptr == 0) {
+		return ERR_INVAL;
+	}
+	return (int)rd_get_size(ptr->size);
+}
+
+int rd_read(const char* path, char* buf, int len) {
+	tar_header* ptr = rd_get_hdr_ptr(path);
+	if(ptr == 0) {
+		return ERR_INVAL;
+	}
+	int size = (int)rd_get_size(ptr->size);
+	int j;
+	for(j = 0; j < size && j < len; j++) {
+		buf[j] = ((char*)ptr)[j+512];
+	}
+	return j;
 }
 
 int rd_write(const char* path, const char* buf, int len) {
@@ -88,6 +105,7 @@ int rd_write(const char* path, const char* buf, int len) {
 fs_ops_t rdops = {
 	rd_read,
 	0,
+	rd_size,
 };
 
 extern void fs_map_drive(int, char, fs_ops_t*);
