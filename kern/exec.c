@@ -4,10 +4,25 @@
 
 int exec(const char* path, int argc, char** argv) {
 	int size = fs_size(path);
-	if(size < 0) return size;
-	size += 0x10000*2;
-	void* ptr = kalloc(size/0x10000);
-	fs_read(path, ptr, size);
+	void* ptr;
+	if(size < 0) {
+		char fn[128] = "Z:\\HengstOS\\System32\\";
+		for(int i = 0; i < strlen(path); i++) {
+			fn[strlen(fn)] = path[i];
+		}
+		size = fs_size(fn);
+		if(size < 0) {
+			return size;
+		}else{
+			size += 0x10000*2;
+			ptr = kalloc(size/0x10000+1);
+			fs_read(fn, ptr, size);
+		}
+	}else{
+		size += 0x10000*2;
+		ptr = kalloc(size/0x10000+1);
+		fs_read(path, ptr, size);
+	}
 	char** argv1 = (char**)(ptr+size-0x10000);
 	for(int i = 0; i < argc; i++) {
 		argv1[i] = (char*)(ptr+size-0x10000+1024*(i+1));

@@ -27,9 +27,10 @@ void main(uint32_t mbaddr) {
 	extern void rd_init(uint32_t);
 	extern int fs_read(const char*, char*, int);
 	extern int mkproc(void*,int,int);
+	extern void init_vgaio_info(uint32_t,uint32_t,uint32_t,uint32_t,uint32_t);
 	extern void* kalloc(int);
 	extern void kfree(void*);
-	init();	
+	init();
 	rd_init(init_addr);
 	//fs_read("Z:\\HengstOS\\System32\\Init.bin", buf, size);
 	//term_puts(buf);
@@ -37,7 +38,6 @@ void main(uint32_t mbaddr) {
 	exec("Z:\\HengstOS\\System32\\init", 0, (char**)0);
 	//mkproc((uint32_t)buf, size, size);
 	//create_process((uint32_t)other_main, (uint32_t)stack+0x4000, 0x1B, 0x23);
-	while(1);
 }
 
 

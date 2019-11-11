@@ -10,6 +10,7 @@ char* rdr = "/";
 
 extern int strlen(const char*);
 extern bool strncmp(const char*,const char*, int);
+extern int strhas(const char*,char);
 
 void decode_rd(char* d, const char* s) {
 	int i;
@@ -78,6 +79,9 @@ tar_header* rd_get_hdr_ptr(const char* path) {
 }
 
 int rd_size(const char* path) {
+	if(strncmp(path, "\\", 2)) {
+		return 0;
+	}
 	tar_header* ptr = rd_get_hdr_ptr(path);
 	if(ptr == 0) {
 		return ERR_INVAL;
@@ -86,6 +90,9 @@ int rd_size(const char* path) {
 }
 
 int rd_read(const char* path, char* buf, int len) {
+	if(strncmp(path, "\\", 2)) {
+		return 0;
+	}
 	tar_header* ptr = rd_get_hdr_ptr(path);
 	if(ptr == 0) {
 		return ERR_INVAL;
@@ -98,6 +105,37 @@ int rd_read(const char* path, char* buf, int len) {
 	return j;
 }
 
+int rd_list(const char* path, char** list, int count, int len) {
+	int k = 0;
+	uint32_t addr = rd_addr;
+	for (int i = 0; ; i++) {
+		tar_header* header = (tar_header*)addr;
+		if (header->filename[0] == '\0')
+			break;
+		unsigned int size = rd_get_size(header->size);
+		char filename[256];
+		decode_rd(filename, header->filename);
+		if(strncmp(path, filename, strlen(path))) {
+			char* fn = filename+strlen(path);
+			if(fn[strlen(fn)-1] == '\\') {
+				fn[strlen(fn)-1] = 0;
+			}
+			if(fn[0] != 0 && strhas(fn, '\\') == 0) {
+				for(int j = 0; j < strlen(fn)+1 && j < len; j++) {
+					list[k][j] = fn[j];
+				}
+				k++;
+				if(k >= count) {
+					return;
+				}
+			}
+		}
+		addr += ((size / 512) + 1) * 512;
+		if(size % 512)
+			addr += 512;
+	}
+}
+
 int rd_write(const char* path, const char* buf, int len) {
 	return ERR_RDONLY;
 }
@@ -106,6 +144,7 @@ fs_ops_t rdops = {
 	rd_read,
 	0,
 	rd_size,
+	rd_list,
 };
 
 extern void fs_map_drive(int, char, fs_ops_t*);

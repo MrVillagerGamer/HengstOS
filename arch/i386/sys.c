@@ -61,6 +61,25 @@ void sys_handler(uint32_t eax, uint32_t ds) {
 	if(data[0] == 9) { // terminate process
 		rmproc(get_current_pid());
 	}
+	if(data[0] == 10) {
+		sys_goto_info_t* info = (sys_goto_info_t*)(data[1]+get_data_base(ds));
+		term_goto(info->x, info->y);
+	}
+	if(data[0] == 11) {
+		sys_uptime_info_t* info = (sys_uptime_info_t*)(data[1]+get_data_base(ds));
+		info->data = get_uptime();
+	}
+	if(data[0] == 12) {
+		sys_list_info_t* info = (sys_list_info_t*)(data[1]+get_data_base(ds));
+		char** list = (char**)((uint32_t)(info->list)+get_data_base(ds));
+		for(int i = 0; i < info->count; i++) {
+			list[i] += get_data_base(ds);
+		}
+		fs_list(info->path+get_data_base(ds), list, info->count, info->len);
+		for(int i = 0; i < info->count; i++) {
+			list[i] -= get_data_base(ds);
+		}
+	}
 }
 
 

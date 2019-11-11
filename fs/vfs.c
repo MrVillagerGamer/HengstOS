@@ -21,6 +21,18 @@ bool strncmp(const char* s1, const char* s2, int len) {
 	return 1;
 }
 
+int strhas(const char* s, char c) {
+	int i = 0;
+	int cnt = 0;
+	while(s[i]) {
+		if(s[i] == c) {
+			cnt++;
+		}
+		i++;
+	}
+	return cnt;
+}
+
 char* fs_getcwd() {
 	return cwd;
 }
@@ -119,6 +131,23 @@ int vfs_get_drv_idx(const char* path) {
 		}
 	}
 	return -1;
+}
+
+int fs_list(const char* path, char** list, int count, int len) {
+	int idx = vfs_get_drv_idx(path);
+	if(idx == -1) {
+		char path2[256];
+		vfs_abs_path(path2, path);
+		idx = vfs_get_drv_idx(path2);
+		if(idx == -1) {
+			return ERR_INVAL;
+		}
+		return fs_ops[idx]->list(path2+2, list, count, len);
+	}
+	if(fs_ops[idx] == 0) {
+		return ERR_RDONLY;
+	}
+	return fs_ops[idx]->list(path+2, list, count, len);
 }
 
 int fs_size(const char* path) {

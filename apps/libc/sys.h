@@ -1,14 +1,35 @@
-#pragma once
-
 #include <stdint.h>
 
-typedef struct {
-	uint32_t func;
-	void* data;
-} __attribute__((packed)) syscall_info_t;
+#define NULL ((void*)0)
+
+#define syscall(data) {\
+asm volatile("pushl %%eax; movl %0, %%eax; int $0x80; popl %%eax"::"r"((uint32_t)data));\
+\
+}
+
+#define COLOR_DEFAULT 0x07
+
+#define SYS_PUTS 0
+#define SYS_GETC 1
+#define SYS_READ 2
+#define SYS_WRITE 3
+#define SYS_CHDIR 4
+#define SYS_GETCWD 5
+#define SYS_CLEAR 6
+#define SYS_EXEC 7
+#define SYS_STATE 8
+#define SYS_EXIT 9
+#define SYS_GOTO 10
+#define SYS_UPTIME 11
+#define SYS_LIST 12
 
 typedef struct {
-	char* buffer;
+    uint32_t mode;
+    void* info;
+} __attribute__((packed)) sys_info_t;
+
+typedef struct {
+	const char* buffer;
 } __attribute__((packed)) sys_chdir_info_t;
 
 typedef struct {
@@ -64,33 +85,10 @@ typedef struct {
 	int len;
 } __attribute__((packed)) sys_list_info_t;
 
-#define syscall(data) {\
-asm volatile("pushl %%eax; movl %0, %%eax; int $0x80; popl %%eax"::"r"((uint32_t)data));\
-\
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+extern void puts(const char*,uint8_t);
+extern uint8_t getc();
+extern void read(const char*,char*,int);
+extern void list(const char*,char**,int,int);
+extern void clear();
+extern void chdir(const char*);
+extern void getcwd(char*);

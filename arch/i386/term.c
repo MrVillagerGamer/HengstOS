@@ -7,6 +7,7 @@ int term_x = 0, term_y = 0;
 uint8_t* term_vram = (uint8_t*)0xB8000;
 
 void term_clear() {
+	term_attr = 0x07;
 	for(int i = 0; i < 80*25; i++) {
 		term_vram[i*2+0] = ' ';
 		term_vram[i*2+1] = term_attr;
@@ -51,7 +52,7 @@ void term_putc(char c) {
 	case '\n':
 		term_x = 0;
 		term_y++;
-		if(term_y >= 24) {
+		if(term_y >= 25) {
 			term_scroll();
 			term_y--;
 		}
@@ -61,7 +62,7 @@ void term_putc(char c) {
 		if(term_x >= 80) {
 			term_x = 0;
 			term_y++;
-			if(term_y >= 24) {
+			if(term_y >= 25) {
 				term_scroll();
 				term_y--;
 			}
@@ -78,7 +79,7 @@ void term_putc(char c) {
 		if(term_x >= 80) {
 			term_x = 0;
 			term_y++;
-			if(term_y >= 24) {
+			if(term_y >= 25) {
 				term_scroll();
 				term_y--;
 			}
@@ -89,7 +90,7 @@ void term_putc(char c) {
 
 void term_puts(char* s) {
 	int i = 0;
-	while(s[i]) {
+	while(s[i] != 0) {
 		term_putc(s[i]);
 		i++;
 	}

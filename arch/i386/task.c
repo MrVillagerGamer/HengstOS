@@ -6,6 +6,12 @@ bool task_states[256];
 regs_t tasks[256];
 int cur_task = 0;
 
+uint32_t uptime = 0;
+
+uint32_t get_uptime() {
+	return uptime;
+}
+
 int find_free_pid() {
 	int fidx = cur_task;
 	bool found = 0;
@@ -44,7 +50,7 @@ void task_init() {
 }
 
 bool get_pid_state(int pid) {
-	if(pid < 0 || pid > 256) return 0;
+	if(pid < 0 || pid >= 256) return 0;
 	return task_states[pid];
 }
 
@@ -59,6 +65,7 @@ void del_proc(int idx) {
 int add_proc(uint32_t eip, uint32_t esp, uint32_t cs, uint32_t ds, int argc, char** argv) {
 	int idx = find_free_pid();
 	tasks[idx] = tasks[cur_task];
+	tasks[idx].eflags = 0x202;
 	tasks[idx].eip = eip;
 	tasks[idx].esp = esp;
 	tasks[idx].eax = argc;
@@ -74,9 +81,16 @@ int add_proc(uint32_t eip, uint32_t esp, uint32_t cs, uint32_t ds, int argc, cha
 }
 
 void switch_task(uint32_t esp) {
-	//term_puts("Switching task\n");
+	uptime++;
 	regs_t* state = (regs_t*)(esp);
 	tasks[cur_task] = *state;
+	if(!task_states[cur_task]) {
+		int ds = tasks[cur_task].ds;
+		kfree(get_data_base(ds));
+		int idx = ((ds & ~0x3)/8-7)/2;
+		int sdata = ((idx*2+7)*8)|3;
+		mseg_free(idx);
+	}
 	cur_task = get_next_task();
 	*state = tasks[cur_task];
 	outb(0x20, 0x20);

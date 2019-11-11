@@ -1,8 +1,12 @@
 [bits 32]
 [org 0x0]
 
+COLOR_STDINP equ 0x07
+COLOR_STDOUT equ 0x08
+
 _start:
 	mov esi, msg
+	mov al, COLOR_STDINP
 	call puts
 	.loop:
 		mov byte [cur_token], 0
@@ -10,6 +14,7 @@ _start:
 		mov edi, cwd
 		call getcwd
 		mov esi, cwd
+		mov al, COLOR_STDOUT
 		call puts
 		mov esi, prompt
 		call puts
@@ -117,19 +122,7 @@ execmd:
 	call strncmp
 	cmp ecx, 0
 	je .chdir
-
-	mov edi, help_tok
-	mov ecx, 5
-	call strncmp
-	cmp ecx, 0
-	je .help
-
-	mov edi, cls_tok
-	mov ecx, 4
-	call strncmp
-	cmp ecx, 0
-	je .cls
-
+	
 	mov esi, opcode
 	call exec
 
@@ -141,6 +134,7 @@ execmd:
 
 	.help:
 		mov esi, help_msg
+		mov al, COLOR_STDINP
 		call puts
 		ret
 
@@ -185,6 +179,7 @@ read:
 puts:
 	pushad
 	mov [sys_puts_param], esi
+	mov [sys_puts_param+4], al
 	mov eax, sys_puts
 	int 0x80
 	popad
@@ -225,7 +220,10 @@ gets:
 		cmp ebx, edi
 		jng .not_bksp
 		mov esi, cur_key
+		push eax
+		mov al, COLOR_STDINP
 		call puts
+		pop eax
 		dec ebx
 		mov byte [ebx], ' '
 		jmp .loop
@@ -235,13 +233,19 @@ gets:
 
 	.char:
 		mov esi, cur_key
+		push eax
+		mov al, COLOR_STDINP
 		call puts
+		pop eax
 		mov [ebx], al
 		inc ebx
 		jmp .loop
 	.done:
 		mov esi, cur_key
+		push eax
+		mov al, COLOR_STDINP
 		call puts
+		pop eax
 		popad
 		ret
 
