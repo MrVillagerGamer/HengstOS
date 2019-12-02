@@ -46,18 +46,18 @@ int checkPaddle(int side) {
 void drawBall() {
     ball_loc.x += ball_dir.x;
     ball_loc.y += ball_dir.y;
-    gfwPlotPixel(4+ball_loc.x, 4+ball_loc.y, GFW_COLOR_WHITE);
-    gfwPlotPixel(4+ball_loc.x+1, 4+ball_loc.y, GFW_COLOR_WHITE);
-    gfwPlotPixel(4+ball_loc.x, 4+ball_loc.y+1, GFW_COLOR_WHITE);
-    gfwPlotPixel(4+ball_loc.x+1, 4+ball_loc.y+1, GFW_COLOR_WHITE);
+    gfwPlotPixel(4+ball_loc.x, 4+ball_loc.y, GFW_COLOR_DEFAULT);
+    gfwPlotPixel(4+ball_loc.x+1, 4+ball_loc.y, GFW_COLOR_DEFAULT);
+    gfwPlotPixel(4+ball_loc.x, 4+ball_loc.y+1, GFW_COLOR_DEFAULT);
+    gfwPlotPixel(4+ball_loc.x+1, 4+ball_loc.y+1, GFW_COLOR_DEFAULT);
 }
 
 void drawPaddle(int side, int loc) {
     for(int i = 4+loc; i < 12+loc; i++) {
         if(side) {
-            gfwPlotPixel(76, i, GFW_COLOR_WHITE);
+            gfwPlotPixel(76, i, GFW_COLOR_DEFAULT);
         }else{
-            gfwPlotPixel(4, i, GFW_COLOR_WHITE);
+            gfwPlotPixel(4, i, GFW_COLOR_DEFAULT);
         }
     }
     
@@ -68,10 +68,17 @@ int exiting = 0;
 void update() {
     gfwDelay(20);
     gfwClearScreen();
-    gfwDrawText(2, 0, "Points: [Not Implemented]", GFW_COLOR_WHITE);
-    gfwDrawRect(2, 2, 78, 44, GFW_COLOR_WHITE);
+    gfwDrawText(2, 0, "Player 1: ", GFW_TEXT_COLOR_DEFAULT);
+    char* buf = " ";
+    buf[0] = lpoints+48;
+    gfwDrawText(12, 0, buf, GFW_TEXT_COLOR_DEFAULT);
+    gfwDrawText(79-12, 0, "Player 2: ", GFW_TEXT_COLOR_DEFAULT);
+    buf[0] = rpoints+48;
+    gfwDrawText(79-2, 0, buf, GFW_TEXT_COLOR_DEFAULT);
+    
+    gfwDrawRect(2, 2, 78, 44, GFW_COLOR_DEFAULT);
     for(int i = 4; i <= 42; i++) {
-        gfwPlotPixel(40, i, GFW_COLOR_WHITE);
+        gfwPlotPixel(40, i, GFW_COLOR_DEFAULT);
     }
     int chr = getc();
     if(chr == LUP && lpos > 0) {
@@ -112,12 +119,12 @@ void update() {
     }
     if(rpoints >= 3) {
         gfwCleanup();
-        puts("Player 2 won!", GFW_COLOR_WHITE);
+        puts("Player 2 won!", COLOR_DEFAULT);
         gfwExit();
     }
     if(lpoints >= 3) {
         gfwCleanup();
-        puts("Player 1 won!", GFW_COLOR_WHITE);
+        puts("Player 1 won!", COLOR_DEFAULT);
         gfwExit();
     }
     drawBall();

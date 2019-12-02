@@ -86,7 +86,7 @@ void switch_task(uint32_t esp) {
 	tasks[cur_task] = *state;
 	if(!task_states[cur_task]) {
 		int ds = tasks[cur_task].ds;
-		kfree(get_data_base(ds));
+		//kfree(get_data_base(ds));
 		int idx = ((ds & ~0x3)/8-7)/2;
 		int sdata = ((idx*2+7)*8)|3;
 		mseg_free(idx);

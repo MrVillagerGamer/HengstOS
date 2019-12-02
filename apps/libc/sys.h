@@ -7,7 +7,7 @@ asm volatile("pushl %%eax; movl %0, %%eax; int $0x80; popl %%eax"::"r"((uint32_t
 \
 }
 
-#define COLOR_DEFAULT 0x07
+#define COLOR_DEFAULT 0x1f
 
 #define SYS_PUTS 0
 #define SYS_GETC 1

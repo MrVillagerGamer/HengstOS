@@ -1,14 +1,18 @@
 #include <arch/i386/term.h>
+#include <arch/i386/font.h>
 #include <stdint.h>
 #include <stdbool.h>
 
-uint8_t term_attr = 0x02;
+uint8_t term_attr = 0x07;
 int term_x = 0, term_y = 0;
-uint8_t* term_vram = (uint8_t*)0xB8000;
+uint8_t* term_vram = (uint8_t*)0xb8000;
+
+int term_w = 80;
+int term_h = 25;
 
 void term_clear() {
-	term_attr = 0x07;
-	for(int i = 0; i < 80*25; i++) {
+	term_attr = 0x1f;
+	for(int i = 0; i < term_w*term_h; i++) {
 		term_vram[i*2+0] = ' ';
 		term_vram[i*2+1] = term_attr;
 	}
@@ -35,15 +39,15 @@ void term_puth(uint32_t hex) {
 }
 
 void term_scroll() {
-	for(int i = 0; i < 80; i++) {
-		for(int j = 1; j < 25; j++) {
-			term_vram[(i+80*(j-1))*2] = term_vram[(i+80*j)*2];
-			term_vram[(i+80*(j-1))*2+1] = term_vram[(i+80*j)*2+1];
+	for(int i = 0; i < term_w; i++) {
+		for(int j = 1; j < term_h; j++) {
+			term_vram[(i+term_w*(j-1))*2] = term_vram[(i+term_w*j)*2];
+			term_vram[(i+term_w*(j-1))*2+1] = term_vram[(i+term_w*j)*2+1];
 		}
 	}
-	for(int i = 0; i < 80; i++) {
-		term_vram[(i+80*24)*2] = ' ';
-		term_vram[(i+80*24)*2+1] = term_attr;
+	for(int i = 0; i < term_w; i++) {
+		term_vram[(i+term_w*(term_h-1))*2] = ' ';
+		term_vram[(i+term_w*(term_h-1))*2+1] = 0x1f;
 	}
 }
 
@@ -52,17 +56,17 @@ void term_putc(char c) {
 	case '\n':
 		term_x = 0;
 		term_y++;
-		if(term_y >= 25) {
+		if(term_y >= term_h) {
 			term_scroll();
 			term_y--;
 		}
 		break;
 	case '\t':
 		term_x += 4;
-		if(term_x >= 80) {
+		if(term_x >= term_w) {
 			term_x = 0;
 			term_y++;
-			if(term_y >= 25) {
+			if(term_y >= term_h) {
 				term_scroll();
 				term_y--;
 			}
@@ -70,16 +74,16 @@ void term_putc(char c) {
 		break;
 	case '\b':
 		term_x--;
-		term_vram[(term_y*80+term_x)*2] = ' ';
+		term_vram[(term_y*term_w+term_x)*2] = ' ';
 		break;
 	default:
-		term_vram[(term_y*80+term_x)*2] = c;
-		term_vram[(term_y*80+term_x)*2+1] = term_attr;
+		term_vram[(term_y*term_w+term_x)*2] = c;
+		term_vram[(term_y*term_w+term_x)*2+1] = term_attr;
 		term_x++;
-		if(term_x >= 80) {
+		if(term_x >= term_w) {
 			term_x = 0;
 			term_y++;
-			if(term_y >= 25) {
+			if(term_y >= term_h) {
 				term_scroll();
 				term_y--;
 			}

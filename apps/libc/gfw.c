@@ -29,7 +29,7 @@ void gfwPlotPixel(int x, int y, int color) {
 void gfwClearScreen() {
     for(int i = 0; i < 80*25; i++) {
         buffer[i*2] = 0;
-        buffer[i*2+1] = 0;
+        buffer[i*2+1] = 0x11;
     }
 }
 

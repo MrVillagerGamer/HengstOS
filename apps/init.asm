@@ -1,8 +1,8 @@
 [bits 32]
 [org 0x0]
 
-COLOR_STDINP equ 0x07
-COLOR_STDOUT equ 0x08
+COLOR_STDINP equ 0x1f
+COLOR_STDOUT equ 0x1e
 
 _start:
 	mov esi, msg
@@ -321,7 +321,7 @@ sys_puts:
 
 sys_puts_param:
 	dd cmd
-	db 0x07
+	db 0x1f
 
 sys_getc:
 	dd 1

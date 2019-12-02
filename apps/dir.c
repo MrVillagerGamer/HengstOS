@@ -25,10 +25,10 @@ void print_list(const char* path) {
         if(paths[i][0] == 0) {
             return;
         }
-        puts(paths[i], 0x07);
-        puts("\n", 0x07);
+        puts(paths[i], COLOR_DEFAULT);
+        puts("\n", COLOR_DEFAULT);
         if((i % 23) == 22) {
-            puts("--more--\n", 0x07);
+            puts("--more--\n", COLOR_DEFAULT);
             while(wgetc() != ' ');
         }
     }

@@ -23,5 +23,6 @@ void init() {
 	uint8_t h = (divisor >> 8) & 0xff;
 	outb(0x40, l);
 	outb(0x40, h);
+	//vga_setmode(320,200,1);
 	user_init();
 }

@@ -6,6 +6,8 @@
 #define GFW_COLOR_MAGENTA 5
 #define GFW_COLOR_YELLOW 6
 #define GFW_COLOR_WHITE 7
+#define GFW_COLOR_DEFAULT GFW_COLOR_WHITE
+#define GFW_TEXT_COLOR_DEFAULT 0x1e
 
 #include <stdint.h>
 
@@ -22,3 +24,5 @@ extern void gfwSwapBuffers();
 extern void gfwExit();
 extern void gfwDelay(int t);
 extern int gfwGetTime();
+extern int gfwNoise2d(int,int);
+extern int gfwNoise1d(int);
